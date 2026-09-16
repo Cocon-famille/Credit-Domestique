@@ -14,6 +14,7 @@ function rowToAccount(row: any): Account {
     balance: row.balance,
     createdAt: row.created_at,
     archived: row.archived,
+    expressCode: row.express_code ?? undefined,
   }
 }
 
@@ -28,6 +29,7 @@ function accountToRow(a: Account) {
     balance: a.balance,
     created_at: a.createdAt,
     archived: a.archived ?? false,
+    express_code: a.expressCode ?? null,
   }
 }
 

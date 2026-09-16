@@ -7,14 +7,33 @@ import { useNav } from '../store/NavProvider'
 import './Connexion.css'
 
 export function Connexion() {
-  const { login } = useBank()
+  const { login, loginExpress } = useBank()
   const { reset } = useNav()
+  const [mode, setMode] = useState<'express' | 'full'>('express')
+
+  const [expressCode, setExpressCode] = useState('')
   const [cardNumber, setCardNumber] = useState('')
   const [holderName, setHolderName] = useState('')
   const [cvc, setCvc] = useState('')
   const [error, setError] = useState(false)
 
-  function handleSubmit(e: FormEvent) {
+  function switchMode(next: 'express' | 'full') {
+    setMode(next)
+    setError(false)
+  }
+
+  function handleExpressSubmit(e: FormEvent) {
+    e.preventDefault()
+    const account = loginExpress(expressCode)
+    if (!account) {
+      setError(true)
+      return
+    }
+    setError(false)
+    reset('compte')
+  }
+
+  function handleFullSubmit(e: FormEvent) {
     e.preventDefault()
     const account = login(stripSpaces(cardNumber), holderName, cvc)
     if (!account) {
@@ -34,59 +53,101 @@ export function Connexion() {
         </div>
         <p className="eyebrow connexion__eyebrow">Identification titulaire</p>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className={`field ${error ? 'field--error' : ''}`}>
-            <label htmlFor="cardNumber">Numéro de carte</label>
-            <input
-              id="cardNumber"
-              className="mono"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="0000 0000 0000 0000"
-              value={formatCardNumber(cardNumber)}
-              onChange={(e) => {
-                setCardNumber(stripSpaces(e.target.value))
-                setError(false)
-              }}
-              maxLength={19}
-            />
-          </div>
-          <div className={`field ${error ? 'field--error' : ''}`}>
-            <label htmlFor="holderName">Titulaire</label>
-            <input
-              id="holderName"
-              autoComplete="off"
-              placeholder="NOM DU TITULAIRE"
-              value={holderName}
-              onChange={(e) => {
-                setHolderName(e.target.value.toUpperCase())
-                setError(false)
-              }}
-            />
-          </div>
-          <div className={`field ${error ? 'field--error' : ''}`}>
-            <label htmlFor="cvc">CVC</label>
-            <input
-              id="cvc"
-              className="mono"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="000"
-              value={cvc}
-              onChange={(e) => {
-                setCvc(e.target.value.replace(/\D/g, '').slice(0, 3))
-                setError(false)
-              }}
-              maxLength={3}
-            />
-          </div>
-          {error && (
-            <p className="field-error field-error--top">Données de carte non reconnues</p>
-          )}
-          <button type="submit" className="button button--primary connexion__submit">
-            Se connecter
-          </button>
-        </form>
+        {mode === 'express' ? (
+          <form onSubmit={handleExpressSubmit} noValidate>
+            <div className={`field ${error ? 'field--error' : ''}`}>
+              <label htmlFor="expressCode">Numéro express</label>
+              <input
+                id="expressCode"
+                className="mono"
+                inputMode="numeric"
+                autoComplete="off"
+                autoFocus
+                placeholder="0000"
+                value={expressCode}
+                onChange={(e) => {
+                  setExpressCode(e.target.value.replace(/\D/g, '').slice(0, 4))
+                  setError(false)
+                }}
+                maxLength={4}
+              />
+            </div>
+            {error && (
+              <p className="field-error field-error--top">Numéro express non reconnu</p>
+            )}
+            <button type="submit" className="button button--primary connexion__submit">
+              Se connecter
+            </button>
+            <button
+              type="button"
+              className="connexion__switch"
+              onClick={() => switchMode('full')}
+            >
+              Connexion complète avec la carte →
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleFullSubmit} noValidate>
+            <div className={`field ${error ? 'field--error' : ''}`}>
+              <label htmlFor="cardNumber">Numéro de carte</label>
+              <input
+                id="cardNumber"
+                className="mono"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="0000 0000 0000 0000"
+                value={formatCardNumber(cardNumber)}
+                onChange={(e) => {
+                  setCardNumber(stripSpaces(e.target.value))
+                  setError(false)
+                }}
+                maxLength={19}
+              />
+            </div>
+            <div className={`field ${error ? 'field--error' : ''}`}>
+              <label htmlFor="holderName">Titulaire</label>
+              <input
+                id="holderName"
+                autoComplete="off"
+                placeholder="NOM DU TITULAIRE"
+                value={holderName}
+                onChange={(e) => {
+                  setHolderName(e.target.value.toUpperCase())
+                  setError(false)
+                }}
+              />
+            </div>
+            <div className={`field ${error ? 'field--error' : ''}`}>
+              <label htmlFor="cvc">CVC</label>
+              <input
+                id="cvc"
+                className="mono"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="000"
+                value={cvc}
+                onChange={(e) => {
+                  setCvc(e.target.value.replace(/\D/g, '').slice(0, 3))
+                  setError(false)
+                }}
+                maxLength={3}
+              />
+            </div>
+            {error && (
+              <p className="field-error field-error--top">Données de carte non reconnues</p>
+            )}
+            <button type="submit" className="button button--primary connexion__submit">
+              Se connecter
+            </button>
+            <button
+              type="button"
+              className="connexion__switch"
+              onClick={() => switchMode('express')}
+            >
+              ← Connexion rapide
+            </button>
+          </form>
+        )}
       </div>
       <div className="connexion__legal">
         <LegalFooter />

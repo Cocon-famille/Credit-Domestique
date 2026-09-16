@@ -67,6 +67,11 @@
   font-weight: 600;
 }
 
+.admin__express {
+  font-size: 11px;
+  color: var(--ardoise);
+}
+
 .admin__account-actions {
   display: flex;
   flex-wrap: wrap;

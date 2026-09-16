@@ -54,6 +54,9 @@ export function Compte() {
         {currentAccount.cardNumber && (
           <div className="compte__card">
             <BankCard account={currentAccount} />
+            {currentAccount.expressCode && (
+              <p className="compte__express mono">Numéro express {currentAccount.expressCode}</p>
+            )}
           </div>
         )}
       </div>

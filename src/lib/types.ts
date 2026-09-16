@@ -10,6 +10,8 @@ export interface Account {
   balance: number // cents
   createdAt: string // ISO
   archived?: boolean
+  /** 4-digit shortcut code for "Connexion rapide" — skips the full card number */
+  expressCode?: string
 }
 
 export type EntryKind =

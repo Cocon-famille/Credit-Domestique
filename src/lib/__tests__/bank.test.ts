@@ -13,7 +13,9 @@ import {
   createAccount,
   depositCash,
   formatMoneyFR,
+  generateExpressCode,
   login,
+  loginExpress,
   postDoubleEntry,
   refuseCharge,
   refuseLoan,
@@ -374,6 +376,27 @@ describe('createAccount / archiveAccount', () => {
     expect(next.accounts).toContainEqual(account)
   })
 
+  it('assigns an express code to a personal account, but not to a company', () => {
+    const state = createInitialState()
+    const { account: person } = createAccount(state, {
+      role: 'child',
+      holderName: 'Test Enfant',
+      cardNumber: '1111222233334444',
+      cvc: '123',
+      expiry: '01/30',
+    })
+    expect(person.expressCode).toMatch(/^\d{4}$/)
+
+    const { account: company } = createAccount(state, {
+      role: 'company',
+      holderName: 'Boulangerie',
+      cardNumber: '',
+      cvc: '',
+      expiry: '',
+    })
+    expect(company.expressCode).toBeUndefined()
+  })
+
   it('archives instead of deleting: the account and its history remain', () => {
     const state = depositCash(createInitialState(), 'marin', 500)
     const next = archiveAccount(state, 'marin')
@@ -417,5 +440,49 @@ describe('login', () => {
     const state = createInitialState()
     expect(login(state, '', 'CRÉDIT DOMESTIQUE', '')).toBeNull()
     expect(login(state, '', 'ÉPICERIE DU SALON', '')).toBeNull()
+  })
+})
+
+describe('loginExpress', () => {
+  it('authenticates with just the 4-digit express code', () => {
+    const { state: withAccount, account: created } = createAccount(createInitialState(), {
+      role: 'child',
+      holderName: 'Test Enfant',
+      cardNumber: '1111222233334444',
+      cvc: '123',
+      expiry: '01/30',
+    })
+    const found = loginExpress(withAccount, created.expressCode!)
+    expect(found?.id).toBe(created.id)
+  })
+
+  it('rejects an unknown code', () => {
+    expect(loginExpress(createInitialState(), '9999')).toBeNull()
+  })
+
+  it('rejects an archived account even with the right code', () => {
+    const { state: withAccount, account } = createAccount(createInitialState(), {
+      role: 'child',
+      holderName: 'Test Enfant',
+      cardNumber: '1111222233334444',
+      cvc: '123',
+      expiry: '01/30',
+    })
+    const archived = archiveAccount(withAccount, account.id)
+    expect(loginExpress(archived, account.expressCode!)).toBeNull()
+  })
+})
+
+describe('generateExpressCode', () => {
+  it('never collides with a code already in use', () => {
+    const state = createInitialState()
+    const taken = generateExpressCode(state)
+    const withTaken: BankState = {
+      ...state,
+      accounts: state.accounts.map((a, i) => (i === 0 ? { ...a, expressCode: taken } : a)),
+    }
+    for (let i = 0; i < 20; i++) {
+      expect(generateExpressCode(withTaken)).not.toBe(taken)
+    }
   })
 })

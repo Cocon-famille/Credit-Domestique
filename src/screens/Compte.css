@@ -33,6 +33,13 @@
   flex-shrink: 0;
 }
 
+.compte__express {
+  margin-top: 8px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--ardoise);
+}
+
 .compte__actions {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

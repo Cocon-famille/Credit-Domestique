@@ -47,6 +47,7 @@ interface BankContextValue {
   adminAccount: Account | null
   isAdmin: boolean
   login: (cardNumber: string, holderName: string, cvc: string) => Account | null
+  loginExpress: (code: string) => Account | null
   logout: () => void
   depositCash: (holderId: string, amount: number) => void
   withdrawCash: (holderId: string, amount: number) => void
@@ -151,6 +152,17 @@ export function BankProvider({ children }: { children: ReactNode }) {
     let result: Account | null = null
     setState((prev) => {
       const account = bank.login(prev, cardNumber, holderName, cvc)
+      result = account
+      if (!account) return prev
+      return { ...prev, currentAccountId: account.id, impersonatedBy: null }
+    })
+    return result
+  }, [])
+
+  const loginExpress = useCallback((code: string) => {
+    let result: Account | null = null
+    setState((prev) => {
+      const account = bank.loginExpress(prev, code)
       result = account
       if (!account) return prev
       return { ...prev, currentAccountId: account.id, impersonatedBy: null }
@@ -336,6 +348,7 @@ export function BankProvider({ children }: { children: ReactNode }) {
     adminAccount,
     isAdmin,
     login,
+    loginExpress,
     logout,
     depositCash,
     withdrawCash,

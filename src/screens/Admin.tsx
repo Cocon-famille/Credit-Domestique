@@ -120,6 +120,9 @@ export function Admin() {
               <p className={`amount admin__balance ${a.balance < 0 ? 'amount--debit' : ''}`}>
                 {formatMoneyFR(a.balance)}
               </p>
+              {a.expressCode && (
+                <p className="admin__express mono">Numéro express {a.expressCode}</p>
+              )}
               <div className="admin__account-actions">
                 <button
                   className="button button--ghost"

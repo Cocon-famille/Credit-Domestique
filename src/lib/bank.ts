@@ -474,6 +474,7 @@ export function createAccount(
     balance?: number
   },
 ): { state: BankState; account: Account } {
+  const needsLogin = input.role === 'admin' || input.role === 'parent' || input.role === 'child'
   const account: Account = {
     id: id(),
     role: input.role,
@@ -483,6 +484,7 @@ export function createAccount(
     expiry: input.expiry,
     balance: input.balance ?? 0,
     createdAt: nowIso(),
+    expressCode: needsLogin ? generateExpressCode(state) : undefined,
   }
   return { state: { ...state, accounts: [...state.accounts, account] }, account }
 }
@@ -513,4 +515,22 @@ export function login(
       a.cvc === cvc,
   )
   return account ?? null
+}
+
+/** "Connexion rapide": a 4-digit shortcut in place of card number + name + CVC. */
+export function loginExpress(state: BankState, code: string): Account | null {
+  const normalizedCode = code.trim()
+  if (normalizedCode === '') return null
+  const account = state.accounts.find((a) => !a.archived && a.expressCode === normalizedCode)
+  return account ?? null
+}
+
+/** A 4-digit code not already assigned to another account. */
+export function generateExpressCode(state: BankState): string {
+  const taken = new Set(state.accounts.map((a) => a.expressCode).filter(Boolean))
+  let code: string
+  do {
+    code = String(Math.floor(1000 + Math.random() * 9000))
+  } while (taken.has(code))
+  return code
 }
