@@ -20,6 +20,7 @@ ordinateur, rien à installer.
 | ADELINE · PARENT | parent | 4972 0031 8846 5146 | 851 | 11/29 |
 | PAPET · GRAND-PÈRE | parent | 4972 0031 8846 5179 | 356 | 09/28 |
 | NANOU · GRAND-MÈRE | parent | 4972 0031 8846 5187 | 902 | 03/32 |
+| DIANE · TANTE | parent | 4972 0031 8846 5195 | 856 | 05/29 |
 | MARIN · FOYER | enfant | 4972 0031 8846 5153 | 639 | 06/31 |
 | JOËL · FOYER | enfant | 4972 0031 8846 5161 | 728 | 06/31 |
 
